@@ -1,5 +1,5 @@
-import { Box, Flex, Text, Textarea } from "@chakra-ui/react";
-import { useState } from "react";
+import { Box, Textarea } from "@chakra-ui/react";
+import { useEffect, useRef, useState } from "react";
 import SyntaxHighlighter from "react-syntax-highlighter";
 // É possível que o usuário escolha um theme diferente para o SyntaxHighlighter
 import { gruvboxDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
@@ -8,14 +8,23 @@ export const Editor = () => {
   const codeString = "const soma = (num) => num + 1";
   const [code, setCode] = useState(codeString);
 
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    if (textareaRef && textareaRef.current) {
+      textareaRef.current.style.height = "0px";
+      const scrollHeight = textareaRef.current.scrollHeight;
+      textareaRef.current.style.height = `${scrollHeight}px`;
+    }
+  }, [code]);
+
   return (
-    <Box>
+    <Box width="600px" whiteSpace="pre-wrap">
       <Textarea
+        ref={textareaRef}
+        onChange={(e) => setCode((e.target as HTMLTextAreaElement).value)}
         spellCheck="false"
         value={code}
-        onChange={(e) => {
-          setCode(e.target.value);
-        }}
         onKeyDown={(e) => {
           if (e.key === "Tab" && !e.shiftKey) {
             // É possível configurar o tabsize para 4, por exemplo
@@ -24,10 +33,10 @@ export const Editor = () => {
             return false;
           }
         }}
-        zIndex="1"
+        zIndex="0"
         position="absolute"
-        width="600px"
         minHeight="100px"
+        w="600px"
         h="auto"
         padding="2rem"
         borderRadius="5px"
@@ -38,6 +47,7 @@ export const Editor = () => {
         lineHeight="20px"
         color="transparent"
         background="transparent"
+        whiteSpace="pre-wrap"
         css={{
           caretColor: "#ff00ff",
         }}
@@ -48,8 +58,11 @@ export const Editor = () => {
 
       <SyntaxHighlighter
         language="javascript"
+        wrapLines={true}
+        wrapLongLines={true}
         style={gruvboxDark}
         customStyle={{
+          display: "inline-block",
           width: "600px",
           height: "fit-content",
           minHeight: "100px",
@@ -57,8 +70,9 @@ export const Editor = () => {
           fontFamily: "monospace",
           padding: "2rem",
           borderRadius: "5px",
-          zIndex: "0",
+          zIndex: "1",
           lineHeight: "20px",
+          whiteSpace: "pre-wrap",
         }}
       >
         {code}
